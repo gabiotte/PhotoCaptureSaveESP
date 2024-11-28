@@ -3,7 +3,8 @@
 #include "esp_camera.h"
 
 bool initCam() {
-    printf("\nInicializando a câmera...\n");
+  printf("\nInicializando a câmera...\n");
+  printf("Heap livre antes da inicialização: %d bytes\n", esp_get_free_heap_size());
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -25,24 +26,28 @@ bool initCam() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_QQVGA;  
-  config.jpeg_quality = 10;            
+  config.pixel_format = PIXFORMAT_RGB565;
+  config.frame_size = FRAMESIZE_VGA;  
+  config.jpeg_quality = 0;            
   config.fb_count = 1;                
-  config.fb_location = CAMERA_FB_IN_DRAM;
+  config.fb_location = CAMERA_FB_IN_PSRAM;
+
 
   if (esp_camera_init(&config) != ESP_OK) {
     printf("Erro: Falha ao inicializar a câmera.\n");
     return false;
   }
   printf("Câmera inicializada com sucesso!\n");
+  printf("Heap livre depois da inicialização: %d bytes\n", esp_get_free_heap_size());
   return true;
 }
 
 camera_fb_t* capturePhoto() {
     if(!initCam()) initCam();
     printf("\nCapturando foto...\n");
+    printf("Tamanho mínimo da pilha do cam_task: %d bytes\n", uxTaskGetStackHighWaterMark(NULL));
     camera_fb_t* fb = esp_camera_fb_get();
+    printf("Cheguei aqui!\n");
     if (!fb) {
       printf("Erro: Falha ao capturar a foto.\n");
       return nullptr;
