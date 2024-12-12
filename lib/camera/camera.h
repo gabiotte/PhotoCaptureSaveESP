@@ -4,6 +4,11 @@
 #ifndef camera
 #define camera
 
+struct Photo {
+    uint8_t* buffer; 
+    size_t len;
+};
+
 #define PWDN_GPIO_NUM    -1
 #define RESET_GPIO_NUM   -1
 #define XCLK_GPIO_NUM    15
@@ -21,7 +26,9 @@
 #define HREF_GPIO_NUM    7
 #define PCLK_GPIO_NUM    13
 
-bool initCam();
-camera_fb_t* capturePhoto();
+bool initCam(pixformat_t pixformat, framesize_t framesize);
+Photo capturePhoto(const char* format);
+Photo toJpeg(camera_fb_t* fb);
+Photo toBmp(camera_fb_t* fb);
 
 #endif

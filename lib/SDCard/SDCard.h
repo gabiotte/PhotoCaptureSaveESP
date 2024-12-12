@@ -10,6 +10,6 @@
 
 bool initSDCard();
 void writeMessage(String message);
-void savePhoto(String path, camera_fb_t* photo);
+void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len);
 
 #endif

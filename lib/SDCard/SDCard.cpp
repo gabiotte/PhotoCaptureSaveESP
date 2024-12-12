@@ -22,7 +22,7 @@ bool initSDCard() {
 }
 
 void writeMessage(String message) {
-    if(!initSDCard()) initSDCard();
+    // if(!initSDCard()) initSDCard();
     printf("\nEscrevendo mensagem...\n");
     File file = SD_MMC.open("/message.txt", FILE_WRITE);
     if (!file) {
@@ -34,20 +34,23 @@ void writeMessage(String message) {
     printf("Escrita no arquivo concluída.\n");    
 }
 
-void savePhoto(String path, camera_fb_t* photo) {
-    if(!initSDCard()) initSDCard();
+void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
+    // if(!initSDCard()) initSDCard();
     printf("\nSalvando foto...\n");
-    if (!photo) {
+    if (!photo_buffer || photo_len == 0) {
       printf("Erro: Foto inválida.\n\n");
       return;
     }
+
     File file = SD_MMC.open(path, FILE_WRITE);
     if (!file) {
         printf("Erro: Falha ao abrir o arquivo no SD.\n");
         return;
     } 
-    file.write(photo->buf, photo->len);
+
+    file.write(photo_buffer, photo_len);
     file.close();
+
     printf("Foto salva com sucesso!\n");
-    esp_camera_fb_return(photo); // Libera o buffer após salvar
+    free(photo_buffer);
 }
