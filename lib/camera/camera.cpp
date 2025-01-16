@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <camera.h>
 #include "esp_camera.h"
-
+#include <SDCard.h>
 
 
 bool initCam(pixformat_t pixformat, framesize_t framesize) {
@@ -42,56 +42,63 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
 }
 
 Photo capturePhoto(const char* format) {
-    // if(!initCam()) initCam();
-    printf("\nCapturando foto...\n");
-    camera_fb_t* fb = esp_camera_fb_get();
-    
-    if (fb==NULL) {
-      printf("Erro: Falha ao capturar a foto.\n");
-      return {nullptr,0};
-    }
-    printf("Foto capturada com sucesso! Tamanho: %d bytes\n", fb->len);
 
-    if (strcmp(format, "original") == 0) {
-        uint8_t* buffer = (uint8_t*)malloc(fb->len);
-        if (buffer == NULL) {
-            printf("Erro: Falha ao alocar memória para a foto original.\n");
-            esp_camera_fb_return(fb);
-            return {nullptr, 0};
-        }
-        memcpy(buffer, fb->buf, fb->len);
-        size_t length = fb->len;
-        esp_camera_fb_return(fb);
-        printf("Foto original retornada.\n");
-        return {buffer, length};
-    } 
-    else if (strcmp(format, "jpeg") == 0) {
-        printf("\nConvertendo para JPEG...\n");
-        Photo jpegPhoto = toJpeg(fb);
-        if (jpegPhoto.buffer == nullptr) {
-            printf("Erro: Falha ao converter para JPEG.\n");
-        } else {
-            printf("Foto convertida para JPEG com sucesso.\n");
-        }
-        return jpegPhoto;
-    } 
-    else if (strcmp(format, "bmp") == 0) {
-        printf("\nConvertendo para BMP...\n");
-        Photo bmpPhoto = toBmp(fb);
-        if (bmpPhoto.buffer == nullptr) {
-            printf("Erro: Falha ao converter para BMP.\n");
-        } else {
-            printf("Foto convertida para BMP com sucesso.\n");
-        }
-        return bmpPhoto;
-    } 
-    else {
-        printf("Erro: Formato desconhecido '%s'.\n", format);
+  printf("\nCapturando foto...\n");
+  camera_fb_t* fb = esp_camera_fb_get();
+  
+  if (fb==NULL) {
+    printf("Erro: Falha ao capturar a foto.\n");
+    return {nullptr,0};
+  }
+  printf("Foto capturada com sucesso! Tamanho: %d bytes\n", fb->len);
+
+  // Salva o arquivo no formato desejado, realizando ou não a conversão:
+  if (fb->format == PIXFORMAT_RGB565) {
+
+    if (strcmp(format, "rgb565") == 0) {
+      uint8_t* buffer = (uint8_t*)malloc(fb->len);
+      if (buffer == NULL) {
+        printf("Erro: Falha ao alocar memória para a foto RGB565.\n");
         esp_camera_fb_return(fb);
         return {nullptr, 0};
+      }
+      memcpy(buffer, fb->buf, fb->len);
+      size_t length = fb->len;
+      esp_camera_fb_return(fb);
+      printf("Foto original em RGB565 retornada.\n");
+      return {buffer, length};
+
+    } else if (strcmp(format, "jpg") == 0) {
+      Photo jpegPhoto = toJpeg(fb);
+      esp_camera_fb_return(fb);
+      return jpegPhoto;
+
+    } else if (strcmp(format, "bmp") == 0) {
+      Photo bmpPhoto = toBmp(fb);
+      esp_camera_fb_return(fb);
+      return bmpPhoto;
+    } 
+
+  } else if (fb->format == PIXFORMAT_JPEG) {
+    uint8_t* buffer = (uint8_t*)malloc(fb->len);
+    if (buffer == NULL) {
+      printf("Erro: Falha ao alocar memória para a foto JPEG.\n");
+      esp_camera_fb_return(fb);
+      return {nullptr, 0};
     }
-    
+    memcpy(buffer, fb->buf, fb->len);
+    size_t length = fb->len;
+    esp_camera_fb_return(fb);
+    printf("Foto original em JPEG retornada.\n");
+    return {buffer, length};
+
+  } else {
+    printf("Erro: Formato desconhecido.\n");
+    esp_camera_fb_return(fb);
+    return {nullptr, 0};
     }
+   
+}
 
 Photo toJpeg(camera_fb_t* fb) {
   printf("Iniciando conversão...\n");
@@ -116,10 +123,8 @@ Photo toBmp(camera_fb_t* fb) {
 
   bool converted = fmt2bmp(fb->buf, fb->len, fb->width, fb->height, PIXFORMAT_RGB565, &bmp_buffer, &bmp_len);
 
-  // Retornar o framebuffer original
   esp_camera_fb_return(fb);
 
-  // Verificar se a conversão foi bem-sucedida
   if (!converted || bmp_buffer == nullptr) {
     printf("Erro: Falha ao converter a imagem para BMP.\n");
     return {nullptr, 0};
@@ -127,4 +132,42 @@ Photo toBmp(camera_fb_t* fb) {
 
   printf("Conversão finalizada.\n");
   return {bmp_buffer, bmp_len};
+}
+
+void capture(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension) {
+
+  for (int count = 1; count <= num_fotos; count++) {
+    printf("\nCapturando e salvando foto %d -----------------------------\n", count);
+
+    char path[64];
+    snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
+
+    Photo photo = capturePhoto(extension);
+    savePhoto(path, photo.buffer, photo.len);
+  }
+  
+  printf("\nFim.\n");
+
+} 
+
+const char* framesize_name(framesize_t framesize) {
+  const char* framesize_name;
+    switch (framesize) {
+      case FRAMESIZE_96X96:    framesize_name = "96x96"; break;
+      case FRAMESIZE_QQVGA:    framesize_name = "QQVGA"; break;
+      case FRAMESIZE_QCIF:     framesize_name = "QCIF"; break;
+      case FRAMESIZE_HQVGA:    framesize_name = "HQVGA"; break;
+      case FRAMESIZE_240X240:  framesize_name = "240x240"; break;
+      case FRAMESIZE_QVGA:     framesize_name = "QVGA"; break;
+      case FRAMESIZE_CIF:      framesize_name = "CIF"; break;
+      case FRAMESIZE_HVGA:     framesize_name = "HVGA"; break;
+      case FRAMESIZE_VGA:      framesize_name = "VGA"; break;
+      case FRAMESIZE_SVGA:     framesize_name = "SVGA"; break;
+      case FRAMESIZE_XGA:      framesize_name = "XGA"; break;
+      case FRAMESIZE_HD:       framesize_name = "HD"; break;
+      case FRAMESIZE_SXGA:     framesize_name = "SXGA"; break;
+      case FRAMESIZE_UXGA:     framesize_name = "UXGA"; break;
+      default:                 framesize_name = "UNKNOWN"; break;
+    }
+  return framesize_name;
 }

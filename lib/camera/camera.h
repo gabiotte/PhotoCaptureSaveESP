@@ -4,6 +4,10 @@
 #ifndef camera
 #define camera
 
+inline pixformat_t pixformat = PIXFORMAT_JPEG;
+inline framesize_t framesize = FRAMESIZE_VGA;
+inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
+
 struct Photo {
     uint8_t* buffer; 
     size_t len;
@@ -30,5 +34,7 @@ bool initCam(pixformat_t pixformat, framesize_t framesize);
 Photo capturePhoto(const char* format);
 Photo toJpeg(camera_fb_t* fb);
 Photo toBmp(camera_fb_t* fb);
+void capture(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension);
+const char* framesize_name(framesize_t framesize);
 
 #endif
