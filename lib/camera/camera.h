@@ -5,8 +5,24 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-inline pixformat_t pixformat = PIXFORMAT_JPEG;
-inline framesize_t framesize = FRAMESIZE_UXGA;
+#define gc0308
+
+#ifdef nt99141
+    inline pixformat_t pixformat = PIXFORMAT_JPEG;
+    inline framesize_t framesize = FRAMESIZE_UXGA;
+
+#elif defined(ov7670) || defined(gc0308)
+    inline pixformat_t pixformat = PIXFORMAT_RGB565;
+    inline framesize_t framesize = FRAMESIZE_UXGA;
+
+#elif defined(ov2640) || defined(ov7725)
+    inline pixformat_t pixformat = PIXFORMAT_JPEG;
+    inline framesize_t framesize = FRAMESIZE_XGA;
+    
+#else 
+    #error "Nenhuma câmera definida."
+#endif
+
 inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
 
 struct Photo {
