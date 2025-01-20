@@ -1,8 +1,9 @@
-#include <Arduino.h>
 #include "esp_camera.h"
 
-#ifndef SDCard
-#define SDCard
+#pragma once
+
+#ifndef __SD_CARD_H__
+#define __SD_CARD_H__
 
 #define CLK GPIO_NUM_39
 #define CMD GPIO_NUM_38

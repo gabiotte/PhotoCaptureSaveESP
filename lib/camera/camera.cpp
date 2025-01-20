@@ -68,7 +68,7 @@ Photo capturePhoto(const char* format) {
       printf("Foto original em RGB565 retornada.\n");
       return {buffer, length};
 
-    } else if (strcmp(format, "jpg") == 0) {
+    } else if (strcmp(format, "jpeg") == 0) {
       Photo jpegPhoto = toJpeg(fb);
       esp_camera_fb_return(fb);
       return jpegPhoto;
@@ -101,18 +101,18 @@ Photo capturePhoto(const char* format) {
 }
 
 Photo toJpeg(camera_fb_t* fb) {
-  printf("Iniciando conversão...\n");
-      uint8_t* jpeg_buffer = nullptr;
-      size_t jpeg_len = 0;
-      bool converted = fmt2jpg(fb->buf, fb->len, fb->width, fb->height, PIXFORMAT_RGB565, 90, &jpeg_buffer, &jpeg_len);
-      esp_camera_fb_return(fb);
+  printf("Iniciando conversão para JPEG...\n");
+  uint8_t* jpeg_buffer = nullptr;
+  size_t jpeg_len = 0;
+  bool converted = fmt2jpg(fb->buf, fb->len, fb->width, fb->height, PIXFORMAT_RGB565, 90, &jpeg_buffer, &jpeg_len);
+  esp_camera_fb_return(fb);
 
-      if (jpeg_buffer==NULL) {
-        printf("Erro: Falha ao converter a foto para JPEG.\n");
-        return {nullptr,0};
-      } 
-      printf("Conversão finalizada.\n");
-      return {jpeg_buffer,jpeg_len};
+  if (jpeg_buffer==NULL) {
+    printf("Erro: Falha ao converter a foto para JPEG.\n");
+    return {nullptr,0};
+  } 
+  printf("Conversão finalizada.\n");
+  return {jpeg_buffer,jpeg_len};
 }
 
 Photo toBmp(camera_fb_t* fb) {
@@ -134,7 +134,8 @@ Photo toBmp(camera_fb_t* fb) {
   return {bmp_buffer, bmp_len};
 }
 
-void capture(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension) {
+void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension) {
+
 
   for (int count = 1; count <= num_fotos; count++) {
     printf("\nCapturando e salvando foto %d -----------------------------\n", count);

@@ -1,24 +1,18 @@
 #include <Arduino.h>
-#include <SDCard.h>
+#include <artigoCameras.h>
 #include <camera.h>
 
-#define LED_PIN 3
-
-int num_photos = 10;
-
+int num_photos = 15;
 
 void setup() {
   Serial.begin(115200);
   delay(6000);
-  printf("Programa iniciado.\n");  
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-  initCam(pixformat, framesize);
-  initSDCard();
-  delay((1000));  
-  capture(num_photos, framesize, pixformat, FORMATO_ARQUIVO_JPEG);
-  
+  if (deviceSetup() == true) {
+    captureMultiPhotos(num_photos, framesize, pixformat, FORMATO_ARQUIVO_JPEG);
+  }
+  printf("\nPrograma finalizado.\n");
 }
+
 
 void loop() {
 }

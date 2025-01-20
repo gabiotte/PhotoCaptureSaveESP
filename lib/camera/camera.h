@@ -1,11 +1,12 @@
-#include <Arduino.h>
 #include "esp_camera.h"
 
-#ifndef camera
-#define camera
+#pragma once
 
-inline pixformat_t pixformat = PIXFORMAT_JPEG;
-inline framesize_t framesize = FRAMESIZE_VGA;
+#ifndef __CAMERA_H__
+#define __CAMERA_H__
+
+inline pixformat_t pixformat = PIXFORMAT_RGB565;
+inline framesize_t framesize = FRAMESIZE_QVGA;
 inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
 
 struct Photo {
@@ -34,7 +35,7 @@ bool initCam(pixformat_t pixformat, framesize_t framesize);
 Photo capturePhoto(const char* format);
 Photo toJpeg(camera_fb_t* fb);
 Photo toBmp(camera_fb_t* fb);
-void capture(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension);
+void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension);
 const char* framesize_name(framesize_t framesize);
 
 #endif

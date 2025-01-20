@@ -14,7 +14,7 @@ bool initSDCard() {
   SD_MMC.setPins(CLK, CMD, D0);
 
   if (!SD_MMC.begin("/sdcard", true)) { 
-    printf("Erro: Falha ao inicializar o cartão SD!\n");
+    printf("Erro: Falha ao inicializar o cartão SD.\n");
     return false;
   }
   printf("SD card pronto!\n");
@@ -37,6 +37,6 @@ void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
     file.write(photo_buffer, photo_len);
     file.close();
 
-    printf("Foto salva com sucesso!\n");
+    printf("Foto salva com sucesso.\n");
     free(photo_buffer);
 }
