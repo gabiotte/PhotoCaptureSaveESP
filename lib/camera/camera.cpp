@@ -144,7 +144,9 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
     snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
 
     Photo photo = capturePhoto(extension);
-    savePhoto(path, photo.buffer, photo.len);
+    if (photo.buffer != nullptr && photo.len > 0) {
+      savePhoto(path, photo.buffer, photo.len);
+    }
   }
   
   printf("\nFim.\n");

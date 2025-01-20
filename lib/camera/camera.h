@@ -5,8 +5,8 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-inline pixformat_t pixformat = PIXFORMAT_RGB565;
-inline framesize_t framesize = FRAMESIZE_QVGA;
+inline pixformat_t pixformat = PIXFORMAT_JPEG;
+inline framesize_t framesize = FRAMESIZE_UXGA;
 inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
 
 struct Photo {
