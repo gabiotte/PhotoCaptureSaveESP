@@ -1,5 +1,3 @@
-#include "esp_camera.h"
-
 #pragma once
 
 #ifndef __SD_CARD_H__
@@ -11,5 +9,6 @@
 
 bool initSDCard();
 void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len);
+void create_dir(const char* path);
 
 #endif

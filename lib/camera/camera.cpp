@@ -136,13 +136,26 @@ Photo toBmp(camera_fb_t* fb) {
 
 void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension) {
 
+  char cameraDir[64];
+  snprintf(cameraDir, sizeof(cameraDir), "/%s", camera);
+  create_dir(cameraDir);
+
+  char group[32];
+  time_t now = time(NULL);
+  snprintf(group, sizeof(group), "%ld", now);
+
+  char groupDir[128];
+  snprintf(groupDir, sizeof(groupDir), "/%s/%s", cameraDir, group);
+  create_dir(groupDir);
 
   for (int count = 1; count <= num_fotos; count++) {
     printf("\nCapturando e salvando foto %d -----------------------------\n", count);
 
-    char path[64];
-    snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
-
+    char path[256];
+    
+    //snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
+    snprintf(path, sizeof(path), "/%s/foto%d.%s", groupDir, count, extension);
+    
     Photo photo = capturePhoto(extension);
     if (photo.buffer != nullptr && photo.len > 0) {
       savePhoto(path, photo.buffer, photo.len);
