@@ -152,7 +152,7 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   snprintf(groupDir, sizeof(groupDir), "%s/%s", cameraDir, group);
   create_dir(groupDir);
 
-  for (int count = 1; count <= num_fotos; count++) {
+  for (int count = 0; count <= num_fotos -1; count++) {
     printf("\nCapturando e salvando foto %d -----------------------------\n", count);
 
     char path[256];
