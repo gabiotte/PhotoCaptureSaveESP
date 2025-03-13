@@ -33,26 +33,30 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.fb_count = 1;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
 
+  unsigned long start = millis();
   if (esp_camera_init(&config) != ESP_OK) {
     printf("Erro: Falha ao inicializar a câmera.\n");
     return false;
   }
-  printf("Câmera inicializada com sucesso!\n");
+  unsigned long init_time = millis() - start;
+  printf("Câmera inicializada com sucesso! Tempo: %lu ms\n", init_time);
   return true;
 }
 
 Photo capturePhoto(const char* format) {
-
+  unsigned long start = micros();
   printf("\nCapturando foto...\n");
+  
   camera_fb_t* fb = esp_camera_fb_get();
+  unsigned long capture_time = micros() - start;
   
   if (fb==NULL) {
     printf("Erro: Falha ao capturar a foto.\n");
-    return {nullptr,0};
+    return {nullptr,0,0};
   }
-  printf("Foto capturada com sucesso! Tamanho: %d bytes\n", fb->len);
+  printf("Foto capturada com sucesso! Tamanho: %d bytes; Tempo: %lu µs\n", fb->len, capture_time);
 
-  // Salva o arquivo no formato desejado, realizando ou não a conversão:
+  // Deixa o arquivo no formato desejado, realizando ou não a conversão:
   if (fb->format == PIXFORMAT_RGB565) {
 
     if (strcmp(format, "rgb565") == 0) {
@@ -60,21 +64,21 @@ Photo capturePhoto(const char* format) {
       if (buffer == NULL) {
         printf("Erro: Falha ao alocar memória para a foto RGB565.\n");
         esp_camera_fb_return(fb);
-        return {nullptr, 0};
+        return {nullptr, 0, 0};
       }
       memcpy(buffer, fb->buf, fb->len);
       size_t length = fb->len;
       esp_camera_fb_return(fb);
       printf("Foto original em RGB565 retornada.\n");
-      return {buffer, length};
+      return {buffer, length, capture_time};
 
     } else if (strcmp(format, "jpeg") == 0) {
-      Photo jpegPhoto = toJpeg(fb);
+      Photo jpegPhoto = toJpeg(fb, capture_time);
       esp_camera_fb_return(fb);
       return jpegPhoto;
 
     } else if (strcmp(format, "bmp") == 0) {
-      Photo bmpPhoto = toBmp(fb);
+      Photo bmpPhoto = toBmp(fb, capture_time);
       esp_camera_fb_return(fb);
       return bmpPhoto;
     } 
@@ -84,23 +88,23 @@ Photo capturePhoto(const char* format) {
     if (buffer == NULL) {
       printf("Erro: Falha ao alocar memória para a foto JPEG.\n");
       esp_camera_fb_return(fb);
-      return {nullptr, 0};
+      return {nullptr, 0, 0};
     }
     memcpy(buffer, fb->buf, fb->len);
     size_t length = fb->len;
     esp_camera_fb_return(fb);
     printf("Foto original em JPEG retornada.\n");
-    return {buffer, length};
+    return {buffer, length, capture_time};
 
   } else {
     printf("Erro: Formato desconhecido.\n");
     esp_camera_fb_return(fb);
-    return {nullptr, 0};
+    return {nullptr, 0, 0};
     }
    
 }
 
-Photo toJpeg(camera_fb_t* fb) {
+Photo toJpeg(camera_fb_t* fb, unsigned long capture_time) {
   printf("Iniciando conversão para JPEG...\n");
   uint8_t* jpeg_buffer = nullptr;
   size_t jpeg_len = 0;
@@ -112,10 +116,10 @@ Photo toJpeg(camera_fb_t* fb) {
     return {nullptr,0};
   } 
   printf("Conversão finalizada.\n");
-  return {jpeg_buffer,jpeg_len};
+  return {jpeg_buffer,jpeg_len, capture_time};
 }
 
-Photo toBmp(camera_fb_t* fb) {
+Photo toBmp(camera_fb_t* fb, unsigned long capture_time) {
   printf("Iniciando conversão para BMP...\n");
 
   uint8_t* bmp_buffer = nullptr;
@@ -127,7 +131,7 @@ Photo toBmp(camera_fb_t* fb) {
 
   if (!converted || bmp_buffer == nullptr) {
     printf("Erro: Falha ao converter a imagem para BMP.\n");
-    return {nullptr, 0};
+    return {nullptr, 0, capture_time};
   }
 
   printf("Conversão finalizada.\n");
@@ -145,7 +149,7 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   snprintf(group, sizeof(group), "%ld", now);
 
   char groupDir[128];
-  snprintf(groupDir, sizeof(groupDir), "/%s/%s", cameraDir, group);
+  snprintf(groupDir, sizeof(groupDir), "%s/%s", cameraDir, group);
   create_dir(groupDir);
 
   for (int count = 1; count <= num_fotos; count++) {

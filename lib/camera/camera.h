@@ -5,7 +5,7 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#define ov7670
+#define gc0308
 
 #if defined(nt99141)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
@@ -41,6 +41,7 @@ inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
 struct Photo {
     uint8_t* buffer; 
     size_t len;
+    unsigned long capture_time;
 };
 
 #define PWDN_GPIO_NUM    -1
@@ -62,8 +63,8 @@ struct Photo {
 
 bool initCam(pixformat_t pixformat, framesize_t framesize);
 Photo capturePhoto(const char* format);
-Photo toJpeg(camera_fb_t* fb);
-Photo toBmp(camera_fb_t* fb);
+Photo toJpeg(camera_fb_t* fb, unsigned long capture_time);
+Photo toBmp(camera_fb_t* fb, unsigned long capture_time);
 void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension);
 const char* framesize_name(framesize_t framesize);
 
