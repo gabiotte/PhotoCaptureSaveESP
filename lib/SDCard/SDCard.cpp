@@ -42,17 +42,6 @@ void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
     free(photo_buffer);
 }
 
-// void create_dir(const char* path) {
-//   struct stat st;
-//   if (stat(path, &st) != 0) {
-//     mkdir(path, 0777);
-//   } if (stat(path, &st) != 0) {
-//     printf("Diretório %s não foi criado.\n", path);
-//     return;
-//   } printf("Diretório %s criado.\n");
-  
-// }
-
 void create_dir(const char* path) {
   if (!SD_MMC.exists(path)) {
     SD_MMC.mkdir(path);
@@ -62,4 +51,27 @@ void create_dir(const char* path) {
     }
     printf("ERRO: Pasta %s não foi criada.\n\n", path);
   }
+}
+
+void create_csv(const char* path, const char* header) {
+  if (!SD_MMC.exists(path)) {
+    File csvFile = SD_MMC.open(path, FILE_WRITE);
+    if (csvFile) {
+      printf("Arquivo CSV criado com sucesso em %s\n", path);
+      csvFile.println(header);
+      csvFile.close();
+    } else {
+      printf("Erro ao criar o arquivo CSV!\n");
+    }
+  }
+}
+
+void save_time(const char* csvPath, const char* photo_name, unsigned long time) {
+  File file = SD_MMC.open(csvPath, FILE_APPEND);
+  if (!file) {
+    printf("Erro: Não foi possível abrir o CSV em %s\n", csvPath);
+    return;
+  }
+  file.printf("%s,%lu\n", photo_name, time);
+  file.close();
 }

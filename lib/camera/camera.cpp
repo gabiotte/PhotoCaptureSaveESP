@@ -44,9 +44,9 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
 }
 
 Photo capturePhoto(const char* format) {
-  unsigned long start = micros();
+
   printf("\nCapturando foto...\n");
-  
+  unsigned long start = micros();  
   camera_fb_t* fb = esp_camera_fb_get();
   unsigned long capture_time = micros() - start;
   
@@ -152,17 +152,26 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   snprintf(groupDir, sizeof(groupDir), "%s/%s", cameraDir, group);
   create_dir(groupDir);
 
+  char csvPath[256];
+  snprintf(csvPath, sizeof(csvPath), "%s/tempo.csv", groupDir);
+
+  create_csv(csvPath, "Foto, Tempo (µs)");
+
   for (int count = 0; count <= num_fotos -1; count++) {
     printf("\nCapturando e salvando foto %d -----------------------------\n", count);
 
     char path[256];
     
+    char photo_name[64];
+    snprintf(photo_name, sizeof(photo_name), "%d.%s", count, extension);
+
     //snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
-    snprintf(path, sizeof(path), "/%s/foto%d.%s", groupDir, count, extension);
+    snprintf(path, sizeof(path), "/%s/%s", groupDir, photo_name);
     
     Photo photo = capturePhoto(extension);
     if (photo.buffer != nullptr && photo.len > 0) {
       savePhoto(path, photo.buffer, photo.len);
+      save_time(csvPath, photo_name, photo.capture_time);
     }
   }
   

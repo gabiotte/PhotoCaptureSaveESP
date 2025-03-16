@@ -10,5 +10,7 @@
 bool initSDCard();
 void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len);
 void create_dir(const char* path);
+void create_csv(const char* path, const char* header);
+void save_time(const char* csvPath, const char* photo_name, unsigned long time);
 
 #endif
