@@ -5,7 +5,7 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#define gc0308
+#define ov7670
 
 #if defined(nt99141)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;

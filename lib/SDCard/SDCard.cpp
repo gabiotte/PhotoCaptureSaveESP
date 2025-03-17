@@ -66,12 +66,12 @@ void create_csv(const char* path, const char* header) {
   }
 }
 
-void save_time(const char* csvPath, const char* photo_name, unsigned long time) {
+void save_time(const char* csvPath, const char* name, unsigned long time) {
   File file = SD_MMC.open(csvPath, FILE_APPEND);
   if (!file) {
     printf("Erro: Não foi possível abrir o CSV em %s\n", csvPath);
     return;
   }
-  file.printf("%s,%lu\n", photo_name, time);
+  file.printf("%s,%lu\n", name, time);
   file.close();
 }

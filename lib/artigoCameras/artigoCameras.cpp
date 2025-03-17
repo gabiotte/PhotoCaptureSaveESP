@@ -11,7 +11,7 @@ bool deviceSetup() {
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LOW);
     
-    if (initCam(pixformat, framesize) == false || initSDCard() == false) {
+    if (initSDCard() == false || initCam(pixformat, framesize) == false) {
         return false;
     }
     

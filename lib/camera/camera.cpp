@@ -39,7 +39,11 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
     return false;
   }
   unsigned long init_time = millis() - start;
-  printf("Câmera inicializada com sucesso! Tempo: %lu ms\n", init_time);
+  printf("Câmera %s inicializada com sucesso! Tempo: %lu ms\n", camera, init_time);
+
+  create_csv("/tempo_cameras.csv", "Camera,Tempo de inicialização (ms)");
+  save_time("/tempo_cameras.csv", camera, init_time);
+
   return true;
 }
 
