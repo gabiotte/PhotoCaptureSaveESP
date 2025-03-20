@@ -119,7 +119,7 @@ Photo toJpeg(camera_fb_t* fb, unsigned long capture_time) {
     printf("Erro: Falha ao converter a foto para JPEG.\n");
     return {nullptr,0};
   } 
-  printf("Conversão finalizada.\n");
+  printf("Conversão finalizada. Tamanho: %d\n", jpeg_len);
   return {jpeg_buffer,jpeg_len, capture_time};
 }
 

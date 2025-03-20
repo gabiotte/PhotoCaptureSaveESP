@@ -23,7 +23,7 @@ bool initSDCard() {
 
 void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
     printf("\nSalvando foto...\n");
-    printf("path: %s\n",path);
+
     if (!photo_buffer || photo_len == 0) {
       printf("Erro: Foto inválida.\n\n");
       return;

@@ -13,6 +13,7 @@ void setup() {
   }
   
   printf("\nPrograma finalizado.\n");
+  digitalWrite(LED_PIN, HIGH);
 }
 
 void loop() {
