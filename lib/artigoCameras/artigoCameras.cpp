@@ -27,3 +27,10 @@ bool deviceSetup() {
     delay((1000));
     return true;
 }
+
+void exit() {
+    printf("\nPrograma finalizado.\n");
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+    digitalWrite(LED_PIN, HIGH);
+}

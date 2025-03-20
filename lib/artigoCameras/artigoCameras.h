@@ -9,5 +9,6 @@
 #define COLOR_ORDER GRB
 
 bool deviceSetup();
+void exit();
 
 #endif

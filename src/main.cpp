@@ -12,8 +12,7 @@ void setup() {
     captureMultiPhotos(num_photos, framesize, pixformat, FORMATO_ARQUIVO_JPEG);
   }
   
-  printf("\nPrograma finalizado.\n");
-  digitalWrite(LED_PIN, HIGH);
+  exit();
 }
 
 void loop() {
