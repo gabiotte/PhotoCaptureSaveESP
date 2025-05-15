@@ -38,7 +38,7 @@ void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
     file.write(photo_buffer, photo_len);
     file.close();
 
-    printf("Foto salva com sucesso em %s.\n", path);
+    printf("Foto salva com sucesso.\n");
     free(photo_buffer);
 }
 

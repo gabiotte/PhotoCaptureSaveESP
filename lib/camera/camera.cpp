@@ -29,10 +29,10 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = pixformat;
   config.frame_size = framesize;  
-  config.jpeg_quality = 15;            
+  config.jpeg_quality = 8;            
   config.fb_count = 1;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
-
+  config.grab_mode = CAMERA_GRAB_LATEST;
   unsigned long start = millis();
   if (esp_camera_init(&config) != ESP_OK) {
     printf("Erro: Falha ao inicializar a câmera.\n");
@@ -112,7 +112,7 @@ Photo toJpeg(camera_fb_t* fb, unsigned long capture_time) {
   printf("Iniciando conversão para JPEG...\n");
   uint8_t* jpeg_buffer = nullptr;
   size_t jpeg_len = 0;
-  bool converted = fmt2jpg(fb->buf, fb->len, fb->width, fb->height, PIXFORMAT_RGB565, 90, &jpeg_buffer, &jpeg_len);
+  bool converted = fmt2jpg(fb->buf, fb->len, fb->width, fb->height, fb->format, 80, &jpeg_buffer, &jpeg_len);
   esp_camera_fb_return(fb);
 
   if (jpeg_buffer==NULL) {
@@ -123,13 +123,13 @@ Photo toJpeg(camera_fb_t* fb, unsigned long capture_time) {
   return {jpeg_buffer,jpeg_len, capture_time};
 }
 
-Photo toBmp(camera_fb_t* fb, unsigned long capture_time) {
+Photo toBmp(camera_fb_t* fb, unsigned long capture_time ) {
   printf("Iniciando conversão para BMP...\n");
 
   uint8_t* bmp_buffer = nullptr;
   size_t bmp_len = 0;
 
-  bool converted = fmt2bmp(fb->buf, fb->len, fb->width, fb->height, PIXFORMAT_RGB565, &bmp_buffer, &bmp_len);
+  bool converted = fmt2bmp(fb->buf, fb->len, fb->width, fb->height, fb->format, &bmp_buffer, &bmp_len);
 
   esp_camera_fb_return(fb);
 
@@ -159,9 +159,21 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   char csvPath[256];
   snprintf(csvPath, sizeof(csvPath), "%s/tempo.csv", groupDir);
 
-  create_csv(csvPath, "Foto, Tempo (µs)");
+  create_csv(csvPath, "Imagem, Tempo (µs)");
 
   for (int count = 0; count <= num_fotos -1; count++) {
+
+    if (count == 0) {
+      camera_fb_t* fb = esp_camera_fb_get();
+      if (fb != nullptr ){
+        printf("\nPrimeira foto descartada com sucesso. \n");
+      } else {
+        printf("\nNão foi possível capturar foto de descarte. \n");
+      }
+      esp_camera_fb_return(fb);
+      
+    }
+
     printf("\nCapturando e salvando foto %d -----------------------------\n", count);
 
     char path[256];
@@ -177,6 +189,7 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
       savePhoto(path, photo.buffer, photo.len);
       save_time(csvPath, photo_name, photo.capture_time);
     }
+
   }
   
   printf("\nFim.\n");

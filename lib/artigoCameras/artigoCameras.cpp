@@ -15,16 +15,15 @@ bool deviceSetup() {
     digitalWrite(LED_PIN, LOW);
 
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-    FastLED.setBrightness(50);
+    FastLED.setBrightness(25);
     fill_solid(leds, NUM_LEDS, CRGB::White);
     FastLED.show();
+    printf("\nRing LED inicializado com sucesso.\n");
     
     if (initSDCard() == false || initCam(pixformat, framesize) == false) {
         
         return false;
     }
-    
-    delay((1000));
     return true;
 }
 

@@ -9,27 +9,27 @@
 
 #if defined(nt99141)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
-    inline framesize_t framesize = FRAMESIZE_HD;
+    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "nt99141";
 
 #elif defined(ov7670)
     inline pixformat_t pixformat = PIXFORMAT_RGB565;
-    inline framesize_t framesize = FRAMESIZE_UXGA;
+    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "ov7670";
 
 #elif defined(gc0308)
     inline pixformat_t pixformat = PIXFORMAT_RGB565;
-    inline framesize_t framesize = FRAMESIZE_UXGA;
+    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "gc0308";
 
 #elif defined(ov2640)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
-    inline framesize_t framesize = FRAMESIZE_UXGA;
+    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "ov2640";
 
 #elif defined(ov7725)
-    inline pixformat_t pixformat = PIXFORMAT_RGB565;
-    inline framesize_t framesize = FRAMESIZE_UXGA;
+    inline pixformat_t pixformat = PIXFORMAT_JPEG;
+    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "ov7725";
     
 #else 
