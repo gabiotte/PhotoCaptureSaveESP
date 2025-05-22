@@ -54,15 +54,13 @@ void create_dir(const char* path) {
 }
 
 void create_csv(const char* path, const char* header) {
-  if (!SD_MMC.exists(path)) {
-    File csvFile = SD_MMC.open(path, FILE_WRITE);
-    if (csvFile) {
-      printf("Arquivo CSV criado com sucesso em %s\n", path);
-      csvFile.println(header);
-      csvFile.close();
-    } else {
-      printf("Erro ao criar o arquivo CSV!\n");
-    }
+  File csvFile = SD_MMC.open(path, FILE_WRITE);
+  if (csvFile) {
+    printf("Arquivo CSV criado com sucesso em %s\n", path);
+    csvFile.println(header);
+    csvFile.close();
+  } else {
+    printf("Erro ao criar o arquivo CSV!\n");
   }
 }
 

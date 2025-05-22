@@ -2,6 +2,7 @@
 #include <camera.h>
 #include "esp_camera.h"
 #include <SDCard.h>
+#include <artigoCameras.h>
 
 
 bool initCam(pixformat_t pixformat, framesize_t framesize) {
@@ -33,26 +34,28 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.fb_count = 1;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.grab_mode = CAMERA_GRAB_LATEST;
-  unsigned long start = millis();
+  unsigned long start = micros();
   if (esp_camera_init(&config) != ESP_OK) {
     printf("Erro: Falha ao inicializar a câmera.\n");
     return false;
   }
-  unsigned long init_time = millis() - start;
-  printf("Câmera %s inicializada com sucesso! Tempo: %lu ms\n", camera, init_time);
-
-  create_csv("/tempo_cameras.csv", "Camera,Tempo de inicialização (ms)");
-  save_time("/tempo_cameras.csv", camera, init_time);
-
+  init_time = micros() - start;
+  printf("Câmera %s inicializada com sucesso! Tempo: %lu µs\n", camera, init_time);
   return true;
 }
 
 Photo capturePhoto(const char* format) {
 
   printf("\nCapturando foto...\n");
+  flash("on");  
+  delay(250);
+
   unsigned long start = micros();  
   camera_fb_t* fb = esp_camera_fb_get();
   unsigned long capture_time = micros() - start;
+  
+  delay(250);
+  flash("off");
   
   if (fb==NULL) {
     printf("Erro: Falha ao capturar a foto.\n");
@@ -148,31 +151,25 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   snprintf(cameraDir, sizeof(cameraDir), "/%s", camera);
   create_dir(cameraDir);
 
-  char group[32];
-  time_t now = time(NULL);
-  snprintf(group, sizeof(group), "%ld", now);
-
-  char groupDir[128];
-  snprintf(groupDir, sizeof(groupDir), "%s/%s", cameraDir, group);
-  create_dir(groupDir);
-
   char csvPath[256];
-  snprintf(csvPath, sizeof(csvPath), "%s/tempo.csv", groupDir);
+  snprintf(csvPath, sizeof(csvPath), "%s/tempo.csv", cameraDir);
 
   create_csv(csvPath, "Imagem, Tempo (µs)");
+  save_time(csvPath, "camera", init_time);
 
+  unsigned long discard_start = micros();  
+  camera_fb_t* fb = esp_camera_fb_get();
+  unsigned long discard_capture_time = micros() - discard_start;
+
+  if (fb != nullptr ){
+    printf("\nPrimeira foto descartada com sucesso. Tempo: %lu µs\n", discard_capture_time);
+  } else {
+    printf("\nNão foi possível capturar foto de descarte. \n");
+  }
+  esp_camera_fb_return(fb);
+
+  delay(80); // +/- tempo necessário para gerar um novo frame
   for (int count = 0; count <= num_fotos -1; count++) {
-
-    if (count == 0) {
-      camera_fb_t* fb = esp_camera_fb_get();
-      if (fb != nullptr ){
-        printf("\nPrimeira foto descartada com sucesso. \n");
-      } else {
-        printf("\nNão foi possível capturar foto de descarte. \n");
-      }
-      esp_camera_fb_return(fb);
-      
-    }
 
     printf("\nCapturando e salvando foto %d -----------------------------\n", count);
 
@@ -182,7 +179,7 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
     snprintf(photo_name, sizeof(photo_name), "%d.%s", count, extension);
 
     //snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
-    snprintf(path, sizeof(path), "/%s/%s", groupDir, photo_name);
+    snprintf(path, sizeof(path), "/%s/%s", cameraDir, photo_name);
     
     Photo photo = capturePhoto(extension);
     if (photo.buffer != nullptr && photo.len > 0) {

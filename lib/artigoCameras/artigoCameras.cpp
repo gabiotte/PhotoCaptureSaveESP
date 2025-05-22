@@ -16,8 +16,6 @@ bool deviceSetup() {
 
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(25);
-    fill_solid(leds, NUM_LEDS, CRGB::White);
-    FastLED.show();
     printf("\nRing LED inicializado com sucesso.\n");
     
     if (initSDCard() == false || initCam(pixformat, framesize) == false) {
@@ -32,4 +30,14 @@ void exit() {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     digitalWrite(LED_PIN, HIGH);
+}
+
+void flash(String modo) {
+    if (modo == "on") {
+        fill_solid(leds, NUM_LEDS, CRGB::White);
+        FastLED.show();
+    } else if (modo == "off") {
+        fill_solid(leds, NUM_LEDS, CRGB::Black);
+        FastLED.show();
+    }
 }

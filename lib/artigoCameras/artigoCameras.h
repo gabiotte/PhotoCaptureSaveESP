@@ -10,5 +10,6 @@
 
 bool deviceSetup();
 void exit();
+void flash(String modo);
 
 #endif

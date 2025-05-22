@@ -5,7 +5,7 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#define gc0308
+#define ov7725
 
 #if defined(nt99141)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
@@ -37,6 +37,7 @@
 #endif
 
 inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
+inline unsigned long init_time = 0;
 
 struct Photo {
     uint8_t* buffer; 
