@@ -5,31 +5,26 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#define ov7725
+#define ov2640
 
 #if defined(nt99141)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
-    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "nt99141";
 
 #elif defined(ov7670)
     inline pixformat_t pixformat = PIXFORMAT_RGB565;
-    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "ov7670";
 
 #elif defined(gc0308)
     inline pixformat_t pixformat = PIXFORMAT_RGB565;
-    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "gc0308";
 
 #elif defined(ov2640)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
-    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "ov2640";
 
 #elif defined(ov7725)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
-    inline framesize_t framesize = FRAMESIZE_VGA;
     inline const char* camera = "ov7725";
     
 #else 
@@ -37,6 +32,7 @@
 #endif
 
 inline const char* FORMATO_ARQUIVO_JPEG = "jpeg"; // jpeg, bmp, rgb565
+inline framesize_t framesize = FRAMESIZE_VGA;
 inline unsigned long init_time = 0;
 
 struct Photo {
@@ -67,6 +63,5 @@ Photo capturePhoto(const char* format);
 Photo toJpeg(camera_fb_t* fb, unsigned long capture_time);
 Photo toBmp(camera_fb_t* fb, unsigned long capture_time);
 void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension);
-const char* framesize_name(framesize_t framesize);
 
 #endif

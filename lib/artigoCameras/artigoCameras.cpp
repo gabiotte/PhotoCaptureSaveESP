@@ -13,22 +13,21 @@ bool deviceSetup() {
     
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LOW);
-
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-    FastLED.setBrightness(25);
-    printf("\nRing LED inicializado com sucesso.\n");
     
-    if (initSDCard() == false || initCam(pixformat, framesize) == false) {
-        
+    printf("\nInicializando flash...");
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+    FastLED.setBrightness(10);
+    printf("\nFlash inicializado com sucesso.\n");
+    
+    if (init_sdcard() == false || initCam(pixformat, framesize) == false) {
         return false;
     }
     return true;
 }
 
 void exit() {
-    printf("\nPrograma finalizado.\n");
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
-    FastLED.show();
+    printf("\nFim do programa.\n");
+    flash("off");
     digitalWrite(LED_PIN, HIGH);
 }
 

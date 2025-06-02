@@ -4,8 +4,8 @@
 #include "SD_MMC.h"
 #include "esp_camera.h"
 
-bool initSDCard() {
-  printf("\nIniciando o cartão SD...\n");
+bool init_sdcard() {
+  printf("\nInicializando o cartão SD...\n");
 
   pinMode(CLK, INPUT_PULLUP); 
   pinMode(CMD, INPUT_PULLUP); 
@@ -17,11 +17,11 @@ bool initSDCard() {
     printf("Erro: Falha ao inicializar o cartão SD.\n");
     return false;
   }
-  printf("SD card pronto!\n");
+  printf("SD card pronto.\n");
   return true;
 }
 
-void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
+void save_photo(String path, uint8_t* photo_buffer, size_t photo_len) {
     printf("\nSalvando foto...\n");
 
     if (!photo_buffer || photo_len == 0) {
@@ -31,7 +31,7 @@ void savePhoto(String path, uint8_t* photo_buffer, size_t photo_len) {
 
     File file = SD_MMC.open(path, FILE_WRITE);
     if (!file) {
-        printf("Erro: Falha ao abrir o arquivo %s no SD.\n", path);
+        printf("Erro: Falha ao abrir o arquivo %s no cartão SD.\n", path);
         return;
     } 
 
@@ -54,9 +54,10 @@ void create_dir(const char* path) {
 }
 
 void create_csv(const char* path, const char* header) {
+  printf("\nCriando aqruivo CSV em '%s'...\n", path);
   File csvFile = SD_MMC.open(path, FILE_WRITE);
   if (csvFile) {
-    printf("Arquivo CSV criado com sucesso em %s\n", path);
+    printf("Arquivo criado com sucesso.\n");
     csvFile.println(header);
     csvFile.close();
   } else {
@@ -64,10 +65,10 @@ void create_csv(const char* path, const char* header) {
   }
 }
 
-void save_time(const char* csvPath, const char* name, unsigned long time) {
-  File file = SD_MMC.open(csvPath, FILE_APPEND);
+void save_time(const char* csv_path, const char* name, unsigned long time) {
+  File file = SD_MMC.open(csv_path, FILE_APPEND);
   if (!file) {
-    printf("Erro: Não foi possível abrir o CSV em %s\n", csvPath);
+    printf("Erro: Não foi possível abrir o CSV em %s\n", csv_path);
     return;
   }
   file.printf("%s,%lu\n", name, time);

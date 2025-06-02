@@ -9,7 +9,6 @@ void setup() {
   delay(6000);
   
   if (deviceSetup() == true) {
-    delay(2500);
     captureMultiPhotos(num_photos, framesize, pixformat, FORMATO_ARQUIVO_JPEG);
   }
   

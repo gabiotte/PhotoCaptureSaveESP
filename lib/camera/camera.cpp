@@ -4,7 +4,6 @@
 #include <SDCard.h>
 #include <artigoCameras.h>
 
-
 bool initCam(pixformat_t pixformat, framesize_t framesize) {
   printf("\nInicializando a câmera...\n");
 
@@ -34,28 +33,25 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.fb_count = 1;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.grab_mode = CAMERA_GRAB_LATEST;
-  unsigned long start = micros();
+
+  unsigned long init_start = micros();
   if (esp_camera_init(&config) != ESP_OK) {
     printf("Erro: Falha ao inicializar a câmera.\n");
     return false;
   }
-  init_time = micros() - start;
-  printf("Câmera %s inicializada com sucesso! Tempo: %lu µs\n", camera, init_time);
+  init_time = micros() - init_start;
+
+  printf("Câmera %s inicializada com sucesso. Tempo: %lu µs\n", camera, init_time);
   return true;
 }
 
 Photo capturePhoto(const char* format) {
 
   printf("\nCapturando foto...\n");
-  flash("on");  
-  delay(250);
 
   unsigned long start = micros();  
   camera_fb_t* fb = esp_camera_fb_get();
   unsigned long capture_time = micros() - start;
-  
-  delay(250);
-  flash("off");
   
   if (fb==NULL) {
     printf("Erro: Falha ao capturar a foto.\n");
@@ -108,11 +104,10 @@ Photo capturePhoto(const char* format) {
     esp_camera_fb_return(fb);
     return {nullptr, 0, 0};
     }
-   
 }
 
 Photo toJpeg(camera_fb_t* fb, unsigned long capture_time) {
-  printf("Iniciando conversão para JPEG...\n");
+  printf("\nIniciando conversão para JPEG...\n");
   uint8_t* jpeg_buffer = nullptr;
   size_t jpeg_len = 0;
   bool converted = fmt2jpg(fb->buf, fb->len, fb->width, fb->height, fb->format, 80, &jpeg_buffer, &jpeg_len);
@@ -127,13 +122,10 @@ Photo toJpeg(camera_fb_t* fb, unsigned long capture_time) {
 }
 
 Photo toBmp(camera_fb_t* fb, unsigned long capture_time ) {
-  printf("Iniciando conversão para BMP...\n");
-
+  printf("\nIniciando conversão para BMP...\n");
   uint8_t* bmp_buffer = nullptr;
   size_t bmp_len = 0;
-
   bool converted = fmt2bmp(fb->buf, fb->len, fb->width, fb->height, fb->format, &bmp_buffer, &bmp_len);
-
   esp_camera_fb_return(fb);
 
   if (!converted || bmp_buffer == nullptr) {
@@ -146,16 +138,17 @@ Photo toBmp(camera_fb_t* fb, unsigned long capture_time ) {
 }
 
 void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixformat, const char* extension) {
-
+  flash("on");
+  
   char cameraDir[64];
   snprintf(cameraDir, sizeof(cameraDir), "/%s", camera);
   create_dir(cameraDir);
 
-  char csvPath[256];
-  snprintf(csvPath, sizeof(csvPath), "%s/tempo.csv", cameraDir);
+  char time_path[256];
+  snprintf(time_path, sizeof(time_path), "%s/tempo.csv", cameraDir);
 
-  create_csv(csvPath, "Imagem, Tempo (µs)");
-  save_time(csvPath, "camera", init_time);
+  create_csv(time_path, "Imagem,Tempo (µs)");
+  save_time(time_path, "camera", init_time);
 
   unsigned long discard_start = micros();  
   camera_fb_t* fb = esp_camera_fb_get();
@@ -168,49 +161,25 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   }
   esp_camera_fb_return(fb);
 
-  delay(80); // +/- tempo necessário para gerar um novo frame
+  delay(1000); 
   for (int count = 0; count <= num_fotos -1; count++) {
 
-    printf("\nCapturando e salvando foto %d -----------------------------\n", count);
+    printf("\n------------------- Capturando foto %d -------------------\n", count);
 
-    char path[256];
-    
     char photo_name[64];
     snprintf(photo_name, sizeof(photo_name), "%d.%s", count, extension);
 
-    //snprintf(path, sizeof(path), "/%s_%d.%s", framesize_name(framesize), count, extension);
-    snprintf(path, sizeof(path), "/%s/%s", cameraDir, photo_name);
+    char photo_path[256];
+    snprintf(photo_path, sizeof(photo_path), "/%s/%s", cameraDir, photo_name);
     
     Photo photo = capturePhoto(extension);
-    if (photo.buffer != nullptr && photo.len > 0) {
-      savePhoto(path, photo.buffer, photo.len);
-      save_time(csvPath, photo_name, photo.capture_time);
-    }
 
+    if (photo.buffer != nullptr && photo.len > 0) {
+      save_photo(photo_path, photo.buffer, photo.len);
+      save_time(time_path, photo_name, photo.capture_time);
+    }
   }
   
-  printf("\nFim.\n");
+  printf("\nFim das capturas.\n");
 
 } 
-
-const char* framesize_name(framesize_t framesize) {
-  const char* framesize_name;
-    switch (framesize) {
-      case FRAMESIZE_96X96:    framesize_name = "96x96"; break;
-      case FRAMESIZE_QQVGA:    framesize_name = "QQVGA"; break;
-      case FRAMESIZE_QCIF:     framesize_name = "QCIF"; break;
-      case FRAMESIZE_HQVGA:    framesize_name = "HQVGA"; break;
-      case FRAMESIZE_240X240:  framesize_name = "240x240"; break;
-      case FRAMESIZE_QVGA:     framesize_name = "QVGA"; break;
-      case FRAMESIZE_CIF:      framesize_name = "CIF"; break;
-      case FRAMESIZE_HVGA:     framesize_name = "HVGA"; break;
-      case FRAMESIZE_VGA:      framesize_name = "VGA"; break;
-      case FRAMESIZE_SVGA:     framesize_name = "SVGA"; break;
-      case FRAMESIZE_XGA:      framesize_name = "XGA"; break;
-      case FRAMESIZE_HD:       framesize_name = "HD"; break;
-      case FRAMESIZE_SXGA:     framesize_name = "SXGA"; break;
-      case FRAMESIZE_UXGA:     framesize_name = "UXGA"; break;
-      default:                 framesize_name = "UNKNOWN"; break;
-    }
-  return framesize_name;
-}
