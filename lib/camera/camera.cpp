@@ -29,7 +29,7 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.xclk_freq_hz = 2000000;
   config.pixel_format = pixformat;
   config.frame_size = framesize;  
-  config.jpeg_quality = 8;
+  config.jpeg_quality = 8;            
   config.fb_count = 1;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.grab_mode = CAMERA_GRAB_LATEST;
@@ -153,17 +153,6 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
 
   create_csv(time_path, "Imagem,Tempo (µs)");
   save_time(time_path, "camera", init_time);
-
-  // unsigned long discard_start = micros();  
-  // camera_fb_t* fb = esp_camera_fb_get();
-  // unsigned long discard_capture_time = micros() - discard_start;
-
-  // if (fb != nullptr ){
-  //   printf("\nPrimeira foto descartada com sucesso. Tempo: %lu µs\n", discard_capture_time);
-  // } else {
-  //   printf("\nNão foi possível capturar foto de descarte. \n");
-  // }
-  // esp_camera_fb_return(fb);
 
   for (int count = -1; count <= num_fotos -1; count++) {
 
