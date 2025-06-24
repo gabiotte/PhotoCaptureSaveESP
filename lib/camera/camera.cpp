@@ -26,10 +26,10 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.pin_sccb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 20000000;
+  config.xclk_freq_hz = 2000000;
   config.pixel_format = pixformat;
   config.frame_size = framesize;  
-  config.jpeg_quality = 8;            
+  config.jpeg_quality = 8;
   config.fb_count = 1;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.grab_mode = CAMERA_GRAB_LATEST;
@@ -40,6 +40,10 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
     return false;
   }
   init_time = micros() - init_start;
+
+  sensor_t * s = esp_camera_sensor_get();
+  s->set_vflip(s, v_flip);
+  s->set_hmirror(s, h_mirror);
 
   printf("Câmera %s inicializada com sucesso. Tempo: %lu µs\n", camera, init_time);
   return true;
@@ -150,21 +154,24 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   create_csv(time_path, "Imagem,Tempo (µs)");
   save_time(time_path, "camera", init_time);
 
-  unsigned long discard_start = micros();  
-  camera_fb_t* fb = esp_camera_fb_get();
-  unsigned long discard_capture_time = micros() - discard_start;
+  // unsigned long discard_start = micros();  
+  // camera_fb_t* fb = esp_camera_fb_get();
+  // unsigned long discard_capture_time = micros() - discard_start;
 
-  if (fb != nullptr ){
-    printf("\nPrimeira foto descartada com sucesso. Tempo: %lu µs\n", discard_capture_time);
-  } else {
-    printf("\nNão foi possível capturar foto de descarte. \n");
-  }
-  esp_camera_fb_return(fb);
+  // if (fb != nullptr ){
+  //   printf("\nPrimeira foto descartada com sucesso. Tempo: %lu µs\n", discard_capture_time);
+  // } else {
+  //   printf("\nNão foi possível capturar foto de descarte. \n");
+  // }
+  // esp_camera_fb_return(fb);
 
-  delay(1000); 
-  for (int count = 0; count <= num_fotos -1; count++) {
+  for (int count = -1; count <= num_fotos -1; count++) {
 
-    printf("\n------------------- Capturando foto %d -------------------\n", count);
+    if (count < 0) {
+      printf("\n------------------- Capturando foto de descarte -------------------\n");
+    } else {
+      printf("\n------------------- Capturando foto %d -------------------\n", count);
+    }
 
     char photo_name[64];
     snprintf(photo_name, sizeof(photo_name), "%d.%s", count, extension);
@@ -174,6 +181,9 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
     
     Photo photo = capturePhoto(extension);
 
+    if (count < 0) {
+      continue;
+    }
     if (photo.buffer != nullptr && photo.len > 0) {
       save_photo(photo_path, photo.buffer, photo.len);
       save_time(time_path, photo_name, photo.capture_time);

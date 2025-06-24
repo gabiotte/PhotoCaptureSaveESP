@@ -5,27 +5,37 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#define ov2640
+#define nt99141
 
 #if defined(nt99141)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
     inline const char* camera = "nt99141";
+    inline int v_flip = 0;
+    inline int h_mirror = 0;
 
 #elif defined(ov7670)
     inline pixformat_t pixformat = PIXFORMAT_RGB565;
     inline const char* camera = "ov7670";
+    inline int v_flip = 1;
+    inline int h_mirror = 1;
 
 #elif defined(gc0308)
     inline pixformat_t pixformat = PIXFORMAT_RGB565;
     inline const char* camera = "gc0308";
+    inline int v_flip = 0;
+    inline int h_mirror = 0;
 
 #elif defined(ov2640)
     inline pixformat_t pixformat = PIXFORMAT_JPEG;
     inline const char* camera = "ov2640";
+    inline int v_flip = 1;
+    inline int h_mirror = 1;
 
 #elif defined(ov7725)
-    inline pixformat_t pixformat = PIXFORMAT_JPEG;
+    inline pixformat_t pixformat = PIXFORMAT_RGB565;
     inline const char* camera = "ov7725";
+    inline int v_flip = 0;
+    inline int h_mirror = 0;
     
 #else 
     #error "Nenhuma câmera definida."
