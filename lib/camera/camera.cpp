@@ -26,11 +26,11 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   config.pin_sccb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 2000000;
+  config.xclk_freq_hz = 16777216;
   config.pixel_format = pixformat;
   config.frame_size = framesize;  
-  config.jpeg_quality = 8;            
-  config.fb_count = 1;                
+  config.jpeg_quality = 12;
+  config.fb_count = 2;                
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.grab_mode = CAMERA_GRAB_LATEST;
 
@@ -41,9 +41,11 @@ bool initCam(pixformat_t pixformat, framesize_t framesize) {
   }
   init_time = micros() - init_start;
 
-  sensor_t * s = esp_camera_sensor_get();
-  s->set_vflip(s, v_flip);
-  s->set_hmirror(s, h_mirror);
+  #ifdef ov7670 || ov2640
+    sensor_t * s = esp_camera_sensor_get();
+    s->set_vflip(s, 1);
+    s->set_hmirror(s, 1);
+  #endif
 
   printf("Câmera %s inicializada com sucesso. Tempo: %lu µs\n", camera, init_time);
   return true;
@@ -154,7 +156,7 @@ void captureMultiPhotos(int num_fotos, framesize_t framesize, pixformat_t pixfor
   create_csv(time_path, "Imagem,Tempo (µs)");
   save_time(time_path, "camera", init_time);
 
-  for (int count = -1; count <= num_fotos -1; count++) {
+  for (int count = -2; count <= num_fotos -1; count++) {
 
     if (count < 0) {
       printf("\n------------------- Capturando foto de descarte -------------------\n");
